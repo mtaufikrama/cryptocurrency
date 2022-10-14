@@ -3,13 +3,26 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 void main() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: "Crypto Currency",
-    home: CryptoCurrency(),
-  ));
+  runApp(
+    const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: "Crypto Currency",
+      home: CryptoCurrency(),
+    ),
+  );
+}
+
+class CurrencyFormat {
+  static String convertToIdr(dynamic number) {
+    NumberFormat currencyFormatter = NumberFormat.currency(
+      locale: 'id',
+      symbol: 'Rp ',
+    );
+    return currencyFormatter.format(number);
+  }
 }
 
 class CryptoCurrency extends StatefulWidget {
@@ -49,12 +62,14 @@ class _CryptoCurrencyState extends State<CryptoCurrency> {
               children: [
                 Card(
                   margin: EdgeInsets.all(20),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25)),
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
-                        Text("USNGKYejdbcsjskdnsnsndbsdnsnsndbdbcn dsjbnc bn dcbn dc"),
+                        Text(
+                            "USNGKYejdbcsjskdnsnsndbsdnsnsndbdbcn dsjbnc bn dcbn dc"),
                         Text("USNGKY"),
                         Text("USNGKY"),
                         Text("USNGKY"),
@@ -81,77 +96,169 @@ class _CryptoCurrencyState extends State<CryptoCurrency> {
                                               AsyncSnapshot snapshotlast) {
                                             if (snapshotlast.hasData) {
                                               double persentase = ((int.parse(
-                                                          snapshot24hr.data[snapshot
-                                                              .data[index]['id']]) -
-                                                      int.parse(snapshotlast
-                                                              .data[snapshot.data[index]['ticker_id']]
-                                                          ["last"])) /
-                                                  int.parse(snapshot24hr
-                                                      .data[snapshot.data[index]['id']]) *
-                                                  -100);
-    
-                                              return GestureDetector(
-                                                onTap: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) {
-                                                        return SummariesCrypto(
-                                                          ticker_id:
+                                                          snapshot24hr.data[
                                                               snapshot.data[index]
-                                                                  ['ticker_id'],
-                                                          id: snapshot.data[index]
-                                                              ['id'],
+                                                                  ['id']]) -
+                                                      int.parse(snapshotlast
+                                                                  .data[
+                                                              snapshot.data[index]
+                                                                  ['ticker_id']]
+                                                          ["last"])) /
+                                                  int.parse(snapshot24hr.data[snapshot.data[index]['id']]) *
+                                                  -100);
+
+                                              return Row(
+                                                children: [
+                                                  Expanded(
+                                                    flex: 8,
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) {
+                                                              return SummariesCrypto(
+                                                                ticker_id: snapshot
+                                                                            .data[
+                                                                        index][
+                                                                    'ticker_id'],
+                                                                id: snapshot
+                                                                        .data[
+                                                                    index]['id'],
+                                                              );
+                                                            },
+                                                          ),
                                                         );
                                                       },
-                                                    ),
-                                                  );
-                                                },
-                                                child: Card(
-                                                  elevation: 5,
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.horizontal(
-                                                              right: Radius.circular(
-                                                                  50))),
-                                                  child: ListTile(
-                                                    trailing: CircleAvatar(
-                                                      backgroundImage: NetworkImage(
-                                                          snapshot.data[index]
-                                                              ['url_logo_png']),
-                                                    ),
-                                                    title: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Text(snapshot.data[index]
-                                                            ['description']),
-                                                        Text(
-                                                          persentase > 0
-                                                              ? "+" +
-                                                                  persentase
-                                                                      .toStringAsFixed(
-                                                                          3)
-                                                              : persentase == 0
-                                                                  ? persentase
-                                                                      .abs()
-                                                                      .toStringAsFixed(
-                                                                          3)
-                                                                  : persentase
-                                                                      .toStringAsFixed(
-                                                                          3),
-                                                          style: TextStyle(
-                                                              color: persentase < 0.0
-                                                                  ? Colors.red
-                                                                  : persentase == 0.0
-                                                                      ? Colors.grey
-                                                                      : Colors.green),
+                                                      child: Container(
+                                                        height: 70,
+                                                        margin: EdgeInsets.only(
+                                                            right: 10,
+                                                            top: 5,
+                                                            bottom: 5),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                                borderRadius: BorderRadius.horizontal(
+                                                                    right: Radius
+                                                                        .circular(
+                                                                            35)),
+                                                                color: persentase <
+                                                                        0.0
+                                                                    ? Colors.red
+                                                                    : persentase ==
+                                                                            0.0
+                                                                        ? Colors
+                                                                            .grey
+                                                                        : Colors
+                                                                            .green),
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Column(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .center,
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                    CurrencyFormat
+                                                                        .convertToIdr(
+                                                                      int.parse(
+                                                                        snapshotlast
+                                                                            .data[snapshot
+                                                                                .data[index]
+                                                                            [
+                                                                            'ticker_id']]["last"],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Text(
+                                                                    snapshot.data[
+                                                                            index]
+                                                                        [
+                                                                        'description'],
+                                                                  )
+                                                                ],
+                                                              ),
+                                                              Text(
+                                                                persentase > 0
+                                                                    ? "+" +
+                                                                        persentase
+                                                                            .toStringAsFixed(
+                                                                                3)
+                                                                    : persentase ==
+                                                                            0
+                                                                        ? persentase
+                                                                            .abs()
+                                                                            .toStringAsFixed(
+                                                                                3)
+                                                                        : persentase
+                                                                            .toStringAsFixed(3),
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
-                                                      ],
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
+                                                  Expanded(
+                                                    flex: 1,
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (context) {
+                                                            return AlertDialog(
+                                                              shape: RoundedRectangleBorder(
+                                                                  borderRadius: BorderRadius.vertical(
+                                                                      bottom: Radius
+                                                                          .circular(
+                                                                              200),
+                                                                      top: Radius
+                                                                          .circular(
+                                                                              20))),
+                                                              title: Text(
+                                                                snapshot.data[
+                                                                        index][
+                                                                    'traded_currency_unit'],
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                style: TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    fontSize:
+                                                                        40),
+                                                              ),
+                                                              content: Image.network(
+                                                                  snapshot.data[
+                                                                          index]
+                                                                      [
+                                                                      'url_logo_png']),
+                                                            );
+                                                          },
+                                                        );
+                                                      },
+                                                      child: CircleAvatar(
+                                                        backgroundImage:
+                                                            NetworkImage(snapshot
+                                                                    .data[index]
+                                                                [
+                                                                'url_logo_png']),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                ],
                                               );
                                             } else {
                                               return Container();
@@ -162,9 +269,11 @@ class _CryptoCurrencyState extends State<CryptoCurrency> {
                                         margin: EdgeInsets.symmetric(
                                             vertical: 5, horizontal: 10),
                                         height: 50,
-                                        width: MediaQuery.of(context).size.width,
+                                        width:
+                                            MediaQuery.of(context).size.width,
                                         decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(20),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
                                             color: Colors.grey),
                                       );
                                     }
