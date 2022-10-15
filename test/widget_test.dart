@@ -7,13 +7,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:indodax_http/home_page.dart';
 
 import 'package:indodax_http/main.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(CryptoCurrency());
+    await tester.pumpWidget(const HomePage());
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
