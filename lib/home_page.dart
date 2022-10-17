@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:indodax_http/crypto_page.dart';
 import 'package:http/http.dart' as http;
+import 'package:indodax_http/deposit.dart';
 import 'package:indodax_http/service.dart';
+import 'package:page_transition/page_transition.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -36,7 +39,7 @@ class _HomePageState extends State<HomePage> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Crypto"),
+          title: const Text("Crypto"),
           backgroundColor: Colors.black,
         ),
         body: Stack(
@@ -88,7 +91,16 @@ class _HomePageState extends State<HomePage> {
                           ),
                           height: 50,
                           onPressed: () {
-                            setState(() {});
+                            Navigator.push(
+                              context,
+                              PageTransition(
+                                child: const DepositPage(),
+                                type: PageTransitionType.topToBottomPop,
+                                childCurrent: widget,
+                                duration: const Duration(seconds: 1),
+                                curve: Curves.easeInOutBack,
+                              ),
+                            );
                           },
                           color: Colors.blue,
                           child: const Text("DEPOSIT"),
@@ -122,240 +134,250 @@ class _HomePageState extends State<HomePage> {
                   height: 20,
                 ),
                 Expanded(
-                  child: FutureBuilder<List<dynamic>>(
-                    future: _pairsDataCrypto(),
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      if (snapshot.hasData) {
-                        return ListView.builder(
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return FutureBuilder<dynamic>(
-                                  future: _price24hrDataCrypto(),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot snapshot24hr) {
-                                    if (snapshot24hr.hasData) {
-                                      return FutureBuilder<dynamic>(
-                                          future: _tickerDataCrypto(),
-                                          builder: (BuildContext context,
-                                              AsyncSnapshot snapshotlast) {
-                                            if (snapshotlast.hasData) {
-                                              double persentase = ((int.parse(
-                                                          snapshot24hr.data[
-                                                              snapshot.data[index]
-                                                                  ['id']]) -
-                                                      int.parse(snapshotlast
-                                                                  .data[
-                                                              snapshot.data[index]
-                                                                  ['ticker_id']]
-                                                          ["last"])) /
-                                                  int.parse(snapshot24hr.data[snapshot.data[index]['id']]) *
-                                                  -100);
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await Future.delayed(
+                        const Duration(seconds: 1),
+                      );
+                      setState(() {});
+                    },
+                    child: FutureBuilder<List<dynamic>>(
+                      future: _pairsDataCrypto(),
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        if (snapshot.hasData) {
+                          return ListView.builder(
+                              itemCount: snapshot.data.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return FutureBuilder<dynamic>(
+                                    future: _price24hrDataCrypto(),
+                                    builder: (BuildContext context,
+                                        AsyncSnapshot snapshot24hr) {
+                                      if (snapshot24hr.hasData) {
+                                        return FutureBuilder<dynamic>(
+                                            future: _tickerDataCrypto(),
+                                            builder: (BuildContext context,
+                                                AsyncSnapshot snapshotlast) {
+                                              if (snapshotlast.hasData) {
+                                                double persentase = ((int.parse(
+                                                            snapshot24hr.data[
+                                                                snapshot.data[index]
+                                                                    ['id']]) -
+                                                        int.parse(snapshotlast
+                                                            .data[snapshot
+                                                                .data[index]
+                                                            ['ticker_id']]["last"])) /
+                                                    int.parse(snapshot24hr.data[snapshot.data[index]['id']]) *
+                                                    -100);
 
-                                              dynamic namecrypto = snapshotlast
-                                                      .data[
-                                                  snapshot.data[index]
-                                                      ['ticker_id']]["name"];
-                                              dynamic tickerID = snapshot
-                                                  .data[index]['ticker_id'];
-                                              dynamic idCrypto = snapshot
-                                                  .data[index]['ticker_id'];
-                                              int hargaCrypto = int.parse(
-                                                snapshotlast.data[
+                                                dynamic namecrypto =
+                                                    snapshotlast.data[snapshot
+                                                            .data[index]
+                                                        ['ticker_id']]["name"];
+                                                dynamic tickerID = snapshot
+                                                    .data[index]['ticker_id'];
+                                                dynamic idCrypto = snapshot
+                                                    .data[index]['ticker_id'];
+                                                int hargaCrypto = int.parse(
+                                                  snapshotlast.data[snapshot
+                                                          .data[index]
+                                                      ['ticker_id']]["last"],
+                                                );
+                                                dynamic namaIDR = snapshot
+                                                        .data[index]
+                                                    ['traded_currency_unit'];
+                                                dynamic logoCrypto =
                                                     snapshot.data[index]
-                                                        ['ticker_id']]["last"],
-                                              );
-                                              dynamic namaIDR =
-                                                  snapshot.data[index]
-                                                      ['traded_currency_unit'];
-                                              dynamic logoCrypto = snapshot
-                                                  .data[index]['url_logo_png'];
+                                                        ['url_logo_png'];
 
-                                              return Row(
-                                                children: [
-                                                  Expanded(
-                                                    flex: 8,
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) {
-                                                              return CryptoPage(
-                                                                ticker_id:
-                                                                    tickerID,
-                                                                id: idCrypto,
-                                                              );
-                                                            },
-                                                          ),
-                                                        );
-                                                      },
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                    .only(
-                                                                top: 5,
-                                                                bottom: 5,
-                                                                right: 10),
-                                                        child: Material(
-                                                          borderRadius:
-                                                              const BorderRadius
-                                                                  .horizontal(
-                                                            right:
-                                                                Radius.circular(
-                                                                    50),
-                                                          ),
-                                                          color: persentase <
-                                                                  0.0
-                                                              ? Colors.red
-                                                              : persentase ==
-                                                                      0.0
-                                                                  ? Colors.grey
-                                                                  : Colors
-                                                                      .green,
-                                                          elevation: 5,
-                                                          child: Container(
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              borderRadius:
-                                                                  const BorderRadius
-                                                                      .horizontal(
-                                                                right: Radius
-                                                                    .circular(
-                                                                        40),
-                                                              ),
-                                                              color:
-                                                                  Colors.white,
+                                                return Row(
+                                                  children: [
+                                                    Expanded(
+                                                      flex: 8,
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder:
+                                                                  (context) {
+                                                                return CryptoPage(
+                                                                  ticker_id:
+                                                                      tickerID,
+                                                                  id: idCrypto,
+                                                                );
+                                                              },
                                                             ),
-                                                            margin:
-                                                                EdgeInsets.only(
-                                                                    right: 12,
-                                                                    bottom: 2),
-                                                            child: Padding(
-                                                              padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                  horizontal:
-                                                                      20,
-                                                                  vertical: 20),
-                                                              child: Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .spaceBetween,
-                                                                children: [
-                                                                  Column(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      Text(
-                                                                        namecrypto,
-                                                                        style:
-                                                                            TextStyle(
-                                                                          fontSize:
-                                                                              15,
-                                                                          fontWeight:
-                                                                              FontWeight.bold,
-                                                                          overflow:
-                                                                              TextOverflow.ellipsis,
+                                                          );
+                                                        },
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                      .only(
+                                                                  top: 5,
+                                                                  bottom: 5,
+                                                                  right: 10),
+                                                          child: Material(
+                                                            borderRadius:
+                                                                const BorderRadius
+                                                                    .horizontal(
+                                                              right: Radius
+                                                                  .circular(50),
+                                                            ),
+                                                            color: persentase <
+                                                                    0.0
+                                                                ? Colors.red
+                                                                : persentase ==
+                                                                        0.0
+                                                                    ? Colors
+                                                                        .grey
+                                                                    : Colors
+                                                                        .green,
+                                                            elevation: 5,
+                                                            child: Container(
+                                                              decoration:
+                                                                  const BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .horizontal(
+                                                                  right: Radius
+                                                                      .circular(
+                                                                          40),
+                                                                ),
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
+                                                              margin:
+                                                                  const EdgeInsets
+                                                                          .only(
+                                                                      right: 12,
+                                                                      bottom:
+                                                                          2),
+                                                              child: Padding(
+                                                                padding: const EdgeInsets
+                                                                        .symmetric(
+                                                                    horizontal:
+                                                                        20,
+                                                                    vertical:
+                                                                        20),
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .spaceBetween,
+                                                                  children: [
+                                                                    Column(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .center,
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        Text(
+                                                                          namecrypto,
+                                                                          style:
+                                                                              const TextStyle(
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
+                                                                            overflow:
+                                                                                TextOverflow.ellipsis,
+                                                                          ),
                                                                         ),
-                                                                      ),
-                                                                      Text(
-                                                                        CurrencyFormat
-                                                                            .convertToIdr(
-                                                                          hargaCrypto,
+                                                                        Text(
+                                                                          CurrencyFormat
+                                                                              .convertToIdr(
+                                                                            hargaCrypto,
+                                                                          ),
                                                                         ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                  Text(
-                                                                    persentase >
-                                                                            0
-                                                                        ? "+${persentase.toStringAsFixed(3)}"
-                                                                        : persentase ==
-                                                                                0
-                                                                            ? persentase.abs().toStringAsFixed(3)
-                                                                            : persentase.toStringAsFixed(3),
-                                                                  ),
-                                                                ],
+                                                                      ],
+                                                                    ),
+                                                                    Text(
+                                                                      persentase >
+                                                                              0
+                                                                          ? "+${persentase.toStringAsFixed(3)}"
+                                                                          : persentase == 0
+                                                                              ? persentase.abs().toStringAsFixed(3)
+                                                                              : persentase.toStringAsFixed(3),
+                                                                    ),
+                                                                  ],
+                                                                ),
                                                               ),
                                                             ),
                                                           ),
                                                         ),
                                                       ),
                                                     ),
-                                                  ),
-                                                  Expanded(
-                                                    flex: 1,
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        showDialog(
-                                                          context: context,
-                                                          builder: (context) {
-                                                            return AlertDialog(
-                                                              shape: const RoundedRectangleBorder(
-                                                                  borderRadius: BorderRadius.vertical(
-                                                                      bottom: Radius
-                                                                          .circular(
-                                                                              200),
-                                                                      top: Radius
-                                                                          .circular(
-                                                                              20))),
-                                                              title: Text(
-                                                                namaIDR,
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .center,
-                                                                style: const TextStyle(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    fontSize:
-                                                                        40),
-                                                              ),
-                                                              content:
-                                                                  Image.network(
-                                                                      logoCrypto),
-                                                            );
-                                                          },
-                                                        );
-                                                      },
-                                                      child: CircleAvatar(
-                                                        backgroundImage:
-                                                            NetworkImage(
-                                                                logoCrypto),
+                                                    Expanded(
+                                                      flex: 1,
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          showDialog(
+                                                            context: context,
+                                                            builder: (context) {
+                                                              return AlertDialog(
+                                                                shape: const RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.vertical(
+                                                                        bottom: Radius.circular(
+                                                                            200),
+                                                                        top: Radius.circular(
+                                                                            20))),
+                                                                title: Text(
+                                                                  namaIDR,
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .center,
+                                                                  style: const TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                      fontSize:
+                                                                          40),
+                                                                ),
+                                                                content: Image
+                                                                    .network(
+                                                                        logoCrypto),
+                                                              );
+                                                            },
+                                                          );
+                                                        },
+                                                        child: CircleAvatar(
+                                                          backgroundImage:
+                                                              NetworkImage(
+                                                                  logoCrypto),
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                ],
-                                              );
-                                            } else {
-                                              return Container();
-                                            }
-                                          });
-                                    } else {
-                                      return Container(
-                                        margin: const EdgeInsets.symmetric(
-                                            vertical: 5, horizontal: 10),
-                                        height: 50,
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            color: Colors.grey),
-                                      );
-                                    }
-                                  });
-                            });
-                      } else {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                    },
+                                                    const SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                  ],
+                                                );
+                                              } else {
+                                                return Container();
+                                              }
+                                            });
+                                      } else {
+                                        return Container(
+                                          margin: const EdgeInsets.symmetric(
+                                              vertical: 5, horizontal: 10),
+                                          height: 50,
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              color: Colors.grey),
+                                        );
+                                      }
+                                    });
+                              });
+                        } else {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                      },
+                    ),
                   ),
                 ),
               ],
